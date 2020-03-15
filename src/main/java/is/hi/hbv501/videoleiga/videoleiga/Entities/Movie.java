@@ -1,10 +1,12 @@
 package is.hi.hbv501.videoleiga.videoleiga.Entities;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Entity
 public class Movie {
@@ -16,6 +18,11 @@ public class Movie {
     private String title;
     private String description;
     private Double rating;
+
+    @CreationTimestamp
+    private LocalDateTime created;
+    @UpdateTimestamp
+    private LocalDateTime lastModified;
 
     @ElementCollection(targetClass=Genre.class)
     @Column(name="genre", nullable=false)
@@ -43,6 +50,14 @@ public class Movie {
         this.id = id;
     }
 
+    public Set<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(Set<Genre> genres) {
+        this.genres = genres;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -66,6 +81,9 @@ public class Movie {
     public void setRating(Double rating) {
         this.rating = rating;
     }
+
+    public LocalDateTime getCreated(){ return created; }
+    public LocalDateTime getLastModified() { return lastModified; }
 
     @Override
     public String toString() {

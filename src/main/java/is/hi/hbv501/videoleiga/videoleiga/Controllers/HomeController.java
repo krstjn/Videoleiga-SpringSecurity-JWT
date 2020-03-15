@@ -8,6 +8,7 @@ import is.hi.hbv501.videoleiga.videoleiga.Services.MovieService;
 import is.hi.hbv501.videoleiga.videoleiga.Services.RentalLogService;
 import is.hi.hbv501.videoleiga.videoleiga.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -42,9 +46,12 @@ public class HomeController {
     }
 
     @RequestMapping("/movies")
-    public List<Movie> Home(@RequestParam(value = "search", required = false) String search) {
+    public List<Movie> Home(@RequestParam(value = "search", required = false) String search,
+                            @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
         if (search != null)
             return movieService.findByTitle(search);
+        else if (date != null)
+            return movieService.findByLastModifiedGreaterThanEqual(date);
         else
             return movieService.findAll();
     }
@@ -71,6 +78,23 @@ public class HomeController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid movie ID"));
         movieService.delete(movie);
         return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(value = "/movies/{id}", method = RequestMethod.PUT)
+    public Movie updateMovie(@PathVariable("id") long id, @Valid @RequestBody Movie movie, BindingResult result) {
+        Movie m = movieService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid movie ID"));
+
+        if (result.hasErrors()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid movie format");
+        }
+
+        m.setTitle(movie.getTitle());
+        m.setDescription(movie.getDescription());
+        m.setRating(movie.getRating());
+        m.setGenres(movie.getGenres());
+
+        return movieService.save(m);
     }
 
     @RequestMapping("/makedata")

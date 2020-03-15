@@ -6,6 +6,7 @@ import is.hi.hbv501.videoleiga.videoleiga.Services.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,9 @@ public class MovieServiceImplementation implements MovieService {
     public Movie save(Movie movie) {
         return repository.save(movie);
     }
+
+    @Override
+    public List<Movie> findByLastModifiedGreaterThanEqual(LocalDateTime date) { return repository.findByLastModifiedGreaterThanEqual(date); }
 
     @Override
     public void delete(Movie movie) {
